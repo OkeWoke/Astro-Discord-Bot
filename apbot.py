@@ -84,6 +84,8 @@ print("Starting Bot...")
 
 f = open("token.txt","r")
 bot_token = f.read()
+bot_token = bot_token.rstrip()
 f.close()
+
 botClient = PlanetaryChadBot()
 botClient.run(bot_token, reconnect=True)
