@@ -28,10 +28,10 @@ class PlanetaryChadBot (discord.Client):
         if message.channel.id == self.regionChannel.id and message.content.lower().startswith(".region"):
             regionToAssign = message.content[8:]
             
-            if regionToAssign.lower() in [s.lower() for s in regions]:
+            if regionToAssign.lower() in [s.lower() for s in self.regions]:
                 role = get(message.guild.roles,name=regionToAssign.title())
                 await message.author.add_roles(role)
-                await self.regionChannel.send("{0} You've been added to the {1} role. {2}\n".format(jup, role.name, sat))
+                await self.regionChannel.send("{0} You've been added to the {1} role. {2}\n".format(self.jup, role.name, self.sat))
             else:
                 await self.regionChannel.send("Role: {0} does not exist.".format(regionToAssign))
 
