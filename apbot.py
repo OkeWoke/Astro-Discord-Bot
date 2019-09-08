@@ -22,7 +22,7 @@ class PlanetaryChadBot (discord.Client):
         print("Logged in")
     
     async def on_message(self, message):
-        
+       
         await self.log(message, "POSTED")
         
         if message.channel.id == self.regionChannel.id and message.content.lower().startswith(".region"):
@@ -49,7 +49,7 @@ class PlanetaryChadBot (discord.Client):
                 elif message.channel.id==self.curvesChannel.id and message.author.id !=self.bot_id: #if someone posts to curve channel and it isnt the bot itself
                     curvedFilename = self.c.curveImg(file.url) 
                     await send_img(self.curvesChannel, curvedFilename)
-            
+        
         if message.content.lower().startswith(".dss"):
             
             async def error(msg):
@@ -63,20 +63,23 @@ class PlanetaryChadBot (discord.Client):
             elif len(params) == 2:
                 if params[1].strip().replace('.','',1).isdigit():
                     radius = float(params[1].strip())
+                    if radius < 0.1 or radius>20:
+                        print("fov err")
+                        await error("Error: FOV Radius should be between 0.1 and 20 degrees")
+                        return
                 else:
                     await error("")
                     return
             else:
                 await error("")
                 return
+
             objname = params[0].strip()
-            f1 = dss.reqImg(objname,radius)
-            if f1.startswith('Error:'):
-                await(error(f1))
+            f1 = await dss.reqImg(objname,radius)
+            if f1.startswith("Error:"):
+                await error(f1)
                 return
-            f2 = dss.fitToJpg(f1)
-            os.remove(f1)
-            await self.send_img(message.channel, f2)
+            await self.send_img(message.channel, f1)
             
     async def send_img(self, channel, filename):
         """Takes a discord channel and string filename, sends file to given channel and then deletes file"""

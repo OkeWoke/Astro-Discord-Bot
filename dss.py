@@ -1,38 +1,26 @@
-from urllib.request import urlretrieve
+import time, asyncio, aiohttp
 
-import astropy.units as u
-from astroquery.skyview import SkyView
-from astropy.io import fits
-from astropy.coordinates import name_resolve
-from PIL import Image
-import numpy as np
-import time, os
+async def reqImg(objname, radii):
+    """Takes astro object name as string, radius of fov float, and saves a jpg file, returns string filename"""
+    url ="https://skyview.gsfc.nasa.gov/current/cgi/runquery.pl?Survey=dss2r&Position={0}&Size={1}&Pixels={2}&Return=JPG".format(objname,radii,500)
 
+    filename = str(int(time.time()*1000000))+'.jpg'
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            async with resp:
+                if resp.status != 200:
+                    return "Error: HTTP 200 not received (connection to survey unavailable )"
 
-def reqImg(objname, radii):
-    """Takes astro object name as string, radius of fov float, and saves a fits file, returns string filename"""
-    try:
-        url = SkyView.get_image_list(position=objname, survey=['DSS'], pixels="500,500",radius=radii*u.deg)[0]
-    except name_resolve.NameResolveError:
-        return "Error: Object name unabled to be resolved in simbad"
-    filename = str(int(time.time()*1000000))+'.fits'
-    urlretrieve(url, filename)
+                if resp.content_type == 'text/html':
+                    return "Error: Invalid object name"
+                data = await resp.read()
+                
+                with open(filename, "wb") as f:
+                    f.write(data)
+        
     return filename
 
-
-def fitToJpg(filename):
-    """Takes a fits filename string, opens fits and saves as 8 bit jpeg, deletes fits returns new filename string"""
-    image_data = fits.getdata(filename,ext=0)
-    maxVal = image_data.max()
-    image_data*=255/maxVal
-    image = Image.fromarray(np.uint8(image_data),mode="L")
-    newFilename = filename.rstrip('.fits')+'.jpg' #Assume ends with .fits and not .FIT etc
-    image.save(newFilename)
-
-    return newFilename
-
 if __name__ == "__main__":
-    #Example usage
-    f1 = reqImg("M20",1)
-    f2 = fitToJpg(f1)
-    os.remove(f1)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(reqImg("Eta Carina",1))
+    loop.close()
