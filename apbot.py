@@ -22,7 +22,7 @@ class PlanetaryChadBot (discord.Client):
         print("Logged in")
     
     async def on_message(self, message):
-       
+        
         await self.log(message, "POSTED")
         
         if message.channel.id == self.regionChannel.id and message.content.lower().startswith(".region"):
@@ -49,7 +49,7 @@ class PlanetaryChadBot (discord.Client):
                 elif message.channel.id==self.curvesChannel.id and message.author.id !=self.bot_id: #if someone posts to curve channel and it isnt the bot itself
                     curvedFilename = self.c.curveImg(file.url) 
                     await send_img(self.curvesChannel, curvedFilename)
-        
+            
         if message.content.lower().startswith(".dss"):
             
             async def error(msg):
@@ -79,6 +79,7 @@ class PlanetaryChadBot (discord.Client):
             if f1.startswith("Error:"):
                 await error(f1)
                 return
+            self.c.percentileClip(f1)
             await self.send_img(message.channel, f1)
             
     async def send_img(self, channel, filename):

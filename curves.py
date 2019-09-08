@@ -77,6 +77,33 @@ class Curve:
 
         return time_string
     
+    def percentileClip(self, filename):
+        """Takes filename string, performs percentile clipping, replaces original file"""
+        img = Image.open(filename)
+        hist = np.array(img.histogram())
+        cumHist = np.cumsum(hist)
+
+        alph = 0.1 #%
+        beta = 100 #%
+
+        i=0
+        while i!=256:
+            if cumHist[i]*100/(500*500) >=alph:
+                break
+            i+=1
+        j=255
+        while j != -1:
+            if cumHist[j]*100/(500*500) <= beta:
+                break
+            j-=1
+
+        LUT = np.array([x for x in range(0,256)])
+        LUT = 255*(LUT-i)/(j-i)
+        LUT = LUT.astype(int)
+        img = img.point(LUT)
+        img.save(filename)
+        
+        
 if __name__=="__main__":
     #Test code
     start = time.time()
