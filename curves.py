@@ -83,7 +83,7 @@ class Curve:
         hist = np.array(img.histogram())
         cumHist = np.cumsum(hist)
 
-        alph = 0.1 #%
+        alph = 0.5 #%
         beta = 100 #%
 
         i=0
@@ -106,11 +106,16 @@ class Curve:
         
 if __name__=="__main__":
     #Test code
-    start = time.time()
     c = Curve()
+    """
+    start = time.time()
+    
     c.curveImg('https://cdn.discordapp.com/attachments/472912167704854529/541448825542410271/test.png')#PNG RGB
     c.curveImg('https://cdn.discordapp.com/attachments/247338197921693697/541490169891782671/Untitled-1.jpg') #jpg RGB
     c.curveImg('https://cdn.discordapp.com/attachments/472912167704854529/541506112223182868/First_attempt.jpg')#L jpg
     c.curveImg('https://cdn.discordapp.com/attachments/342068044249563146/541744305539383296/Autosave_DBE.jpg')#L jpg
     end = time.time()
     print(end-start)
+    """
+    c.percentileClip('space2.jpg')
+    
