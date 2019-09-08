@@ -1,4 +1,4 @@
-import discord, asyncio, curves, os
+import discord, asyncio, curves, os, dss
 from discord.utils import get
 
 class PlanetaryChadBot (discord.Client):
@@ -22,7 +22,7 @@ class PlanetaryChadBot (discord.Client):
         print("Logged in")
     
     async def on_message(self, message):
-    
+        
         await self.log(message, "POSTED")
         
         if message.channel.id == self.regionChannel.id and message.content.lower().startswith(".region"):
@@ -39,21 +39,50 @@ class PlanetaryChadBot (discord.Client):
             file = message.attachments[0] #Grabbing only the first attachment
             
             if  file.filename[file.filename.rfind("."):] in [".jpg",".JPG",".png",".PNG"]:
-            
-                async def send_img(channel):
-                    curvedFilename = self.c.curveImg(file.url) #Curves image, writes and then returns filename written for later access.
-                    await channel.send(file=discord.File(curvedFilename))
-                    os.remove(curvedFilename)
-    
                 if message.channel.id != self.curvesChannel.id: #its an image posted and not in curve channel
                     c_1 = await self.curve_reaction()
                     c_2 = await self.curve_reaction()
                     if c_1 and c_2:
-                        await send_img(message.channel)
+                        curvedFilename = self.c.curveImg(file.url) #Curves image, writes and then returns filename written for later access.
+                        await self.send_img(message.channel, curvedFilename)
                 
                 elif message.channel.id==self.curvesChannel.id and message.author.id !=self.bot_id: #if someone posts to curve channel and it isnt the bot itself
-                    await send_img(self.curvesChannel)
-    
+                    curvedFilename = self.c.curveImg(file.url) 
+                    await send_img(self.curvesChannel, curvedFilename)
+            
+        if message.content.lower().startswith(".dss"):
+            
+            async def error(msg):
+                if msg=="":
+                    msg = "Error: incorrect usage of .dss\nFormat - '.dss Object Name, fov radius in deg'\nExample 1:  '.dss Orion Nebula, 2'\nExample 2: '.dss 5h35m16s -5d23m27s, 2'"
+                await message.channel.send(msg)
+            params = message.content.lstrip('.dss').split(',')
+
+            if len(params) == 1:
+                radius = 1 #default radii 1 degrees
+            elif len(params) == 2:
+                if params[1].strip().replace('.','',1).isdigit():
+                    radius = float(params[1].strip())
+                else:
+                    await error("")
+                    return
+            else:
+                await error("")
+                return
+            objname = params[0].strip()
+            f1 = dss.reqImg(objname,radius)
+            if f1.startswith('Error:'):
+                await(error(f1))
+                return
+            f2 = dss.fitToJpg(f1)
+            os.remove(f1)
+            await self.send_img(message.channel, f2)
+            
+    async def send_img(self, channel, filename):
+        """Takes a discord channel and string filename, sends file to given channel and then deletes file"""
+        await channel.send(file=discord.File(filename))
+        os.remove(filename)
+        
     async def curve_reaction(self):
         def check(reaction,user):
             return reaction.emoji == self.lefty
