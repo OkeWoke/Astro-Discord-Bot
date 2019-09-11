@@ -26,6 +26,7 @@ async def resolve_img(objname, radii):
 async def resolve_object(objname):
     """Takes an object name, requests simbad and returns RA and DEC coordinate string tuple pair (ICRS j2k) """
     url = "http://simbad.u-strasbg.fr/simbad/sim-id?output.format=ASCII&obj.bibsel=off&Ident={0}".format(objname)
+    
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             async with resp:
