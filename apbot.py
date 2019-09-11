@@ -22,7 +22,7 @@ class PlanetaryChadBot (discord.Client):
         print("Logged in")
     
     async def on_message(self, message):
-        
+   
         await self.log(message, "POSTED")
         
         if message.channel.id == self.regionChannel.id and message.content.lower().startswith(".region"):
@@ -49,42 +49,53 @@ class PlanetaryChadBot (discord.Client):
                 elif message.channel.id==self.curvesChannel.id and message.author.id !=self.bot_id: #if someone posts to curve channel and it isnt the bot itself
                     curvedFilename = self.c.curveImg(file.url) 
                     await send_img(self.curvesChannel, curvedFilename)
-            
+
+        async def error_check(obj):
+            if type(obj) == str and obj.startswith('Error:'):
+                await message.channel.send(obj)
+                return True
+            return False
         if message.content.lower().startswith(".dss"):
             
-            async def error(msg):
-                if msg=="":
-                    msg = "Error: incorrect usage of .dss\nFormat - '.dss Object Name, fov radius in deg'\nExample 1:  '.dss Orion Nebula, 2'\nExample 2: '.dss 5h35m16s -5d23m27s, 2'"
-                await message.channel.send(msg)
+                
             params = message.content.lstrip('.dss').split(',')
 
             if len(params) == 1:
                 radius = 1 #default radii 1 degrees
-            elif len(params) == 2:
-                if params[1].strip().replace('.','',1).isdigit():
-                    radius = float(params[1].strip())
-                    if radius < 0.1 or radius>20:
-                        print("fov err")
-                        await error("Error: FOV Radius should be between 0.1 and 20 degrees")
-                        return
-                else:
-                    await error("")
+            elif len(params) == 2 and params[1].strip().replace('.','',1).isdigit():
+                radius = float(params[1].strip())
+                if radius < 0.1 or radius>20:
+                    
+                    await message.channel.send("Error: FOV Radius should be between 0.1 and 20 degrees")
                     return
             else:
-                await error("")
+                await message.channel.send("Error: incorrect usage of .dss\nFormat - '.dss Object Name, fov radius in deg'\nExample 1:  '.dss Orion Nebula, 2'\nExample 2: '.dss 5h35m16s -5d23m27s, 2'")
                 return
 
             objname = params[0].strip()
-            f1 = await dss.reqImg(objname,radius)
-            if f1.startswith("Error:"):
-                await error(f1)
+            coords = await dss.resolve_object(objname)
+            if await error_check(coords):
                 return
+            f1 = await dss.resolve_img(coords[0].replace(' ','')+coords[1].replace(' ',''),radius)
+            if await error_check(f1):
+                return
+                
             self.c.percentileClip(f1)
-            await self.send_img(message.channel, f1)
+            coord_msg = "{0} Coordinates (ICRS J2k) \nRA: {1}\nDEC: {2}".format(objname, coords[0],coords[1])
+            await self.send_img(message.channel, f1,msg=coord_msg)
             
-    async def send_img(self, channel, filename):
+        if message.content.lower().startswith(".coord"):
+            param = message.content[6:]
+            coords = await dss.resolve_object(param)
+            if await error_check(coords):
+                return
+
+            await message.channel.send("{0} Coordinates (ICRS J2k) \nRA: {1}\nDEC: {2}".format(param, coords[0],coords[1]))
+
+            
+    async def send_img(self, channel, filename, msg=""):
         """Takes a discord channel and string filename, sends file to given channel and then deletes file"""
-        await channel.send(file=discord.File(filename))
+        await channel.send(msg,file=discord.File(filename))
         os.remove(filename)
         
     async def curve_reaction(self):
