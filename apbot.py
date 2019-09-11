@@ -79,8 +79,7 @@ class PlanetaryChadBot (discord.Client):
             
             if not await error_check(coords):
                 coord_msg = "{0} Coordinates (ICRS J2k) \nRA: {1}\nDEC: {2}".format(objname, coords[0],coords[1])
-            else: 
-                coord_msg = coords
+            
             await self.send_img(message.channel, f1,msg=coord_msg)
             
         if message.content.lower().startswith(".coord"):
