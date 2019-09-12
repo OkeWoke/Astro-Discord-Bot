@@ -48,8 +48,9 @@ class PlanetaryChadBot (discord.Client):
                 
                 elif message.channel.id==self.curvesChannel.id and message.author.id !=self.bot_id: #if someone posts to curve channel and it isnt the bot itself
                     curvedFilename = self.c.curveImg(file.url) 
-                    await send_img(self.curvesChannel, curvedFilename)
-        
+                    await self.send_img(self.curvesChannel, curvedFilename)
+                    return
+
         async def error_check(obj):
             if type(obj) == str and obj.startswith('Error:'):
                 await message.channel.send(obj)
@@ -91,8 +92,12 @@ class PlanetaryChadBot (discord.Client):
             await message.channel.send("{0} Coordinates (ICRS J2k) \nRA: {1}\nDEC: {2}".format(param, coords[0],coords[1]))
 
             
-    async def send_img(self, channel, filename, msg=""):
+    async def send_img(self, channel, filename, **kwarg):
         """Takes a discord channel and string filename, sends file to given channel and then deletes file"""
+        if "msg" in kwarg:
+            msg = kwarg["msg"]
+        else:
+            msg = ""
         await channel.send(msg,file=discord.File(filename))
         os.remove(filename)
         
