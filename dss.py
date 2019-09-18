@@ -43,10 +43,10 @@ async def resolve_object(objname):
                     return "Error: Coordinates not found in response"
 
                 resp_text = resp_text[coord_i.start():coord_i.end()]
-                RA_i = re.search("\d\d \d\d \d\d\.\d*",resp_text)
+                RA_i = re.search("\d\d \d\d \d\d\.?\d*",resp_text)
                 RA = resp_text[RA_i.start():RA_i.end()].split(' ')
                 
-                DEC_i = re.search("[+-]\d\d \d\d \d\d\.\d*",resp_text)
+                DEC_i = re.search("[+-]\d\d \d\d \d\d\.?\d*",resp_text)
                 DEC = resp_text[DEC_i.start():DEC_i.end()].split(' ')
                 
                 RA_s = "{0}h {1}m {2}s".format(RA[0], RA[1], RA[2][0:2])
