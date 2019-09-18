@@ -37,7 +37,7 @@ async def resolve_object(objname):
                 if "No known catalog could be found" in resp_text:
                     return "Error: Invalid object name"
                     
-                coord_i = re.search("Coordinates\(ICRS,ep=J2000,eq=2000\): \d\d \d\d \d\d\.\d*  [+-]\d\d \d\d \d\d\.\d*",resp_text)
+                coord_i = re.search("Coordinates\(ICRS,ep=J2000,eq=2000\): \d\d \d\d \d\d\.?\d*  [+-]\d\d \d\d \d\d\.?\d*",resp_text)
                
                 if(coord_i == None):
                     return "Error: Coordinates not found in response"
