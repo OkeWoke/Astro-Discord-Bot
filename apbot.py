@@ -44,16 +44,22 @@ class PlanetaryChadBot (discord.Client):
         if message.channel.id != self.comImgChannel.id and message.attachments != []: #There is an attachment
             file = message.attachments[0] #Grabbing only the first attachment
             
-            if  file.filename[file.filename.rfind("."):] in [".jpg",".JPG",".png",".PNG"]:
+            if  file.filename[file.filename.rfind("."):] in [".jpg",".JPG",".png",".PNG",".gif",".GIF"]:
                 if message.channel.id != self.curvesChannel.id: #its an image posted and not in curve channel
                     c_1 = await self.curve_reaction()
                     c_2 = await self.curve_reaction()
                     if c_1 and c_2:
-                        curvedFilename = self.c.curveImg(file.url) #Curves image, writes and then returns filename written for later access.
+                        filename = await self.getImg(file.url)
+                        if await error_check(filename):
+                            return
+                        curvedFilename = self.c.curveImg(filename) #Curves image, writes and then returns filename written for later access.
                         await self.send_img(message.channel, curvedFilename)
                 
                 elif message.channel.id==self.curvesChannel.id and message.author.id !=self.bot_id: #if someone posts to curve channel and it isnt the bot itself
-                    curvedFilename = self.c.curveImg(file.url) 
+                    filename = await self.getImg(file.url)
+                    if await error_check(filename):
+                        return
+                    curvedFilename = self.c.curveImg(filename)
                     await self.send_img(self.curvesChannel, curvedFilename)
                     return
 
@@ -132,6 +138,24 @@ class PlanetaryChadBot (discord.Client):
                 f.write(string+"\n")
             if appendage != "POSTED":
                 await self.delMsgChannel.send(string)
+                
+                
+     async def getImg(self, url):
+        """Takes img url that contains 3 or 4 char extension, saves and returns filename"""
+        try:
+            ext = re.search("\.[A-Za-z]{3,4}$",url).group(0)
+        except AttributeError as e:
+            return 'Error: invalid url provided or contains an unsupported file extension'
+        else:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    if resp.status==200:
+                        time_string = str(int(round(time.time() * 1000)))
+                        filename = 'temp/{0}{1}'.format(time_string,ext)
+                        f = await aiofiles.open(filename, mode='wb')
+                        await f.write(await resp.read())
+                        await f.close()
+                        return filename
 
 print("Starting Bot...")
 

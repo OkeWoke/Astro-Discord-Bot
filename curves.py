@@ -7,8 +7,9 @@ Created on Sun Feb  3 15:52:07 2019
 
 from scipy import interpolate as ip
 from PIL import Image
-import urllib.request,time
+from PIL import GifImagePlugin
 import numpy as np
+import time, asyncio, aiohttp, aiofiles, re
 
 class Curve:
 
@@ -52,31 +53,41 @@ class Curve:
                 
         self.LUT_TABLE = np.clip(self.LUT_TABLE,0,255)
         self.LUT_TABLE_RGB = np.concatenate([self.LUT_TABLE,self.LUT_TABLE,self.LUT_TABLE])
-        
-
-    def curveImg(self,imageUrl):
-        """Takes an image url, downloads it, curves it, saves it and returns the filename"""
-              
-        time_string = str(int(round(time.time() * 1000)))+".jpg"
-
-        opener=urllib.request.build_opener()
-        opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
-        urllib.request.install_opener(opener)
-
-        urllib.request.urlretrieve(imageUrl,time_string)
-        img = Image.open(time_string)
-        img = img.convert("RGB")
-        
-      
-        img = img.point(self.LUT_TABLE_RGB)
-        if img.width > 5000 and img.height<=img.width: #wide or square aspect
-            img = img.resize((5000,int(5000*img.height/img.width)))
-        elif img.height >5000 and img.height>=img.width: #tall aspect
-            img = img.resize((int(img.width*5000/img.height),5000))
-        img.save(time_string,quality=20)#If quality is bad up quality value or add subsampling=0
-
-        return time_string
     
+    def curveImg(self,filename):
+        """Takes a filename, applies curves to it and overwrites"""
+        
+        img = Image.open(filename)
+        
+        def curve(img):
+            """Takes PIL image object, performs curve to img and returns ref """
+            img = img.convert("RGB")
+            img = img.point(self.LUT_TABLE_RGB)
+            if img.width > 5000 and img.height<=img.width: #wide or square aspect
+                img = img.resize((5000,int(5000*img.height/img.width)))
+            elif img.height >5000 and img.height>=img.width: #tall aspect
+                img = img.resize((int(img.width*5000/img.height),5000))
+            return img
+            
+        try:
+            if img.is_animated:
+                
+                
+                img_list = [ ]
+                dur_list = [ ]
+                
+                for i in range(0,img.n_frames):
+                    img.seek(i)
+                    dur_list.append(img.info['duration'])
+                    img2 = img.copy()
+                    img2 = curve(img2)
+                    img_list.append(img2)
+            
+                img_list[0].save(filename, format='GIF', append_images=img_list[1:], duration = dur_list, save_all=True, loop=0)
+        except AttributeError as e: # Single static img, not gif
+            img = curve(img)   #If quality is bad up quality value or add subsampling=0
+            img.save(filename,quality=20)
+         
     def percentileClip(self, filename):
         """Takes filename string, performs percentile clipping, replaces original file"""
         img = Image.open(filename)
@@ -103,11 +114,19 @@ class Curve:
         img = img.point(LUT)
         img.save(filename)
         
-        
+async def caller():
+    c = Curve()
+    a = await c.getImg('https://user-images.githubusercontent.com/25434152/41413306-fdf055f2-6fe2-11e8-9625-baee45d0636f.gif')
+    c.curveImg(a)
+    
+    b = await c.getImg('https://cdn.discordapp.com/attachments/556987083122802720/627977718507634699/image0.png')
+    c.curveImg(b)
+    
 if __name__=="__main__":
     #Test code
-    c = Curve()
+    
     """
+    c = Curve()
     start = time.time()
     
     c.curveImg('https://cdn.discordapp.com/attachments/472912167704854529/541448825542410271/test.png')#PNG RGB
@@ -117,5 +136,11 @@ if __name__=="__main__":
     end = time.time()
     print(end-start)
     """
-    c.percentileClip('space2.jpg')
+    
+    loop = asyncio.get_event_loop()
+    
+    loop.run_until_complete(caller())
+    
+    loop.close()
+    #c.percentileClip('space2.jpg')
     
