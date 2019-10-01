@@ -56,15 +56,15 @@ class PlanetaryChadBot (discord.Client):
                         filename = await self.getImg(file.url)
                         if await error_check(filename):
                             return
-                        curvedFilename = self.c.curveImg(filename) #Curves image, writes and then returns filename written for later access.
-                        await self.send_img(message.channel, curvedFilename)
+                        self.c.curveImg(filename) #Curves image, writes and then returns filename written for later access.
+                        await self.send_img(message.channel, filename)
                 
                 elif message.channel.id==self.curvesChannel.id and message.author.id !=self.bot_id: #if someone posts to curve channel and it isnt the bot itself
                     filename = await self.getImg(file.url)
                     if await error_check(filename):
                         return
-                    curvedFilename = self.c.curveImg(filename)
-                    await self.send_img(self.curvesChannel, curvedFilename)
+                    self.c.curveImg(filename) #curves inplace
+                    await self.send_img(self.curvesChannel, filename)
                     return
 
         
