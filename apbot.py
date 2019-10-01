@@ -1,4 +1,4 @@
-import discord, asyncio, curves, os, dss, logging, aiofiles, aiohttp
+import discord, asyncio, curves, os, dss, logging, aiofiles, aiohttp, time, re
 from discord.utils import get
 
 logger = logging.getLogger('discord')
@@ -30,7 +30,11 @@ class PlanetaryChadBot (discord.Client):
     async def on_message(self, message):
         
         await self.log(message, "POSTED")
-        
+        async def error_check(obj):
+            if type(obj) == str and obj.startswith('Error:'):
+                await message.channel.send(obj)
+                return True
+            return False
         if message.channel.id == self.regionChannel.id and message.content.lower().startswith(".region"):
             regionToAssign = message.content[8:]
             
@@ -63,11 +67,7 @@ class PlanetaryChadBot (discord.Client):
                     await self.send_img(self.curvesChannel, curvedFilename)
                     return
 
-        async def error_check(obj):
-            if type(obj) == str and obj.startswith('Error:'):
-                await message.channel.send(obj)
-                return True
-            return False
+        
         if message.content.lower().startswith(".dss"):
             params = message.content.lstrip('.dss').split(',')
             if len(params) == 1:
