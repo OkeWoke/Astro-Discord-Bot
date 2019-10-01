@@ -140,7 +140,7 @@ class PlanetaryChadBot (discord.Client):
                 await self.delMsgChannel.send(string)
                 
                 
-     async def getImg(self, url):
+    async def getImg(self, url):
         """Takes img url that contains 3 or 4 char extension, saves and returns filename"""
         try:
             ext = re.search("\.[A-Za-z]{3,4}$",url).group(0)
