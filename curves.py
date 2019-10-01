@@ -9,7 +9,7 @@ from scipy import interpolate as ip
 from PIL import Image
 from PIL import GifImagePlugin
 import numpy as np
-import time, asyncio, aiohttp, aiofiles, re
+import time, re
 
 class Curve:
 
@@ -114,33 +114,7 @@ class Curve:
         img = img.point(LUT)
         img.save(filename)
         
-async def caller():
-    c = Curve()
-    a = await c.getImg('https://user-images.githubusercontent.com/25434152/41413306-fdf055f2-6fe2-11e8-9625-baee45d0636f.gif')
-    c.curveImg(a)
-    
-    b = await c.getImg('https://cdn.discordapp.com/attachments/556987083122802720/627977718507634699/image0.png')
-    c.curveImg(b)
-    
 if __name__=="__main__":
     #Test code
-    
-    """
-    c = Curve()
-    start = time.time()
-    
-    c.curveImg('https://cdn.discordapp.com/attachments/472912167704854529/541448825542410271/test.png')#PNG RGB
-    c.curveImg('https://cdn.discordapp.com/attachments/247338197921693697/541490169891782671/Untitled-1.jpg') #jpg RGB
-    c.curveImg('https://cdn.discordapp.com/attachments/472912167704854529/541506112223182868/First_attempt.jpg')#L jpg
-    c.curveImg('https://cdn.discordapp.com/attachments/342068044249563146/541744305539383296/Autosave_DBE.jpg')#L jpg
-    end = time.time()
-    print(end-start)
-    """
-    
-    loop = asyncio.get_event_loop()
-    
-    loop.run_until_complete(caller())
-    
-    loop.close()
-    #c.percentileClip('space2.jpg')
-    
+
+

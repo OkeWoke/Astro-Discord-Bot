@@ -1,4 +1,4 @@
-import discord, asyncio, curves, os, dss, logging
+import discord, asyncio, curves, os, dss, logging, aiofiles, aiohttp
 from discord.utils import get
 
 logger = logging.getLogger('discord')
