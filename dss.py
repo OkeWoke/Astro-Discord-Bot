@@ -36,7 +36,7 @@ async def resolve_object(objname):
                     return "Error: HTTP 200 not received (connection to simbad unavailable )"
                 resp_text = await resp.text()
                 
-                if "No known catalog could be found" or "this identifier has an incorrect format for catalog"  in resp_text:
+                if "No known catalog could be found" in resp_text or "this identifier has an incorrect format for catalog"  in resp_text:
                     with open('dss_res_obj_log.txt','a+') as f:
                         f.write(await resp.text())
                     return "Error: Invalid object name"
