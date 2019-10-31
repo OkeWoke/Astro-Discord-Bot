@@ -14,6 +14,8 @@ async def resolve_img(objname, radii):
                     return "Error: HTTP 200 not received (connection to survey unavailable )"
 
                 if resp.content_type == 'text/html':
+                    with open('dss_err_log.txt','a+') as f:
+                        f.write(await resp.text())
                     return "Error: Invalid object name"
                 data = await resp.read()
                 
@@ -34,7 +36,7 @@ async def resolve_object(objname):
                     return "Error: HTTP 200 not received (connection to simbad unavailable )"
                 resp_text = await resp.text()
                 
-                if "No known catalog could be found" in resp_text:
+                if "No known catalog could be found" or "this identifier has an incorrect format for catalog"  in resp_text:
                     return "Error: Invalid object name"
                     
                 coord_i = re.search("Coordinates\(ICRS,ep=J2000,eq=2000\): \d\d \d\d \d\d\.?\d*  [+-]\d\d \d\d \d\d\.?\d*",resp_text)
