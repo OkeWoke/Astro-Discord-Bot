@@ -49,17 +49,8 @@ class PlanetaryChadBot (discord.Client):
             file = message.attachments[0] #Grabbing only the first attachment
             
             if  file.filename[file.filename.rfind("."):] in [".jpg",".JPG",".png",".PNG",".gif",".GIF"]:
-                if message.channel.id != self.curvesChannel.id: #its an image posted and not in curve channel
-                    c_1 = await self.curve_reaction()
-                    c_2 = await self.curve_reaction()
-                    if c_1 and c_2:
-                        filename = await self.getImg(file.url)
-                        if await error_check(filename):
-                            return
-                        self.c.curveImg(filename) #Curves image, writes and then returns filename written for later access.
-                        await self.send_img(message.channel, filename)
-                
-                elif message.channel.id==self.curvesChannel.id and message.author.id !=self.bot_id: #if someone posts to curve channel and it isnt the bot itself
+               
+                if message.channel.id==self.curvesChannel.id and message.author.id !=self.bot_id: #if someone posts to curve channel and it isnt the bot itself
                     filename = await self.getImg(file.url)
                     if await error_check(filename):
                         return
@@ -112,17 +103,7 @@ class PlanetaryChadBot (discord.Client):
             msg = ""
         await channel.send(msg,file=discord.File(filename))
         os.remove(filename)
-        
-    async def curve_reaction(self):
-        def check(reaction,user):
-            return reaction.emoji == self.lefty
-            
-        try:
-            reaction, user = await self.wait_for('reaction_add', timeout=600, check=check)
-        except asyncio.TimeoutError:
-            return False
-        return True
-            
+                  
     async def on_message_delete(self, message):
         await self.log(message, "DELETED")
 
