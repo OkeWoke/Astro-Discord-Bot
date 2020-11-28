@@ -97,7 +97,7 @@ class PlanetaryChadBot (discord.Client):
             await message.channel.send("{0} Coordinates (ICRS J2k) \nRA: {1}\nDEC: {2}".format(param, coords[0],coords[1]))
 
         if message.channel.id == self.r9kchannel.id:
-            self.r9k.handle_message(self, message)
+            await self.r9k.handle_message(self, message)
 
             
     async def send_img(self, channel, filename, **kwarg):
