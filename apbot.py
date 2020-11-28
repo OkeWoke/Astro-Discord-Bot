@@ -13,7 +13,15 @@ class PlanetaryChadBot (discord.Client):
     
     regions = ["New Zealand","Australia","Europe","United States","Canada","Central America","South America","Asia","Middle East","Africa"]
 
+    async def on_connect(self):
+        self.init()
+        print("On connect called")
+
     async def on_ready(self):
+        self.init()
+        print("ON ready called")
+
+    def init(self):
         self.jup = get(self.emojis, name='Jupiter')
         self.sat = get(self.emojis, name='Saturn')
         self.lefty = get(self.emojis, name='lefty')
@@ -27,8 +35,7 @@ class PlanetaryChadBot (discord.Client):
         self.c = curves.Curve()
         self.r9k = r9k.R9K()
         
-        print("Logged in")
-    
+
     async def on_message(self, message):
         
         await self.log(message, "POSTED")
