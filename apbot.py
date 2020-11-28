@@ -21,6 +21,10 @@ class PlanetaryChadBot (discord.Client):
         self.init()
         print("ON ready called")
 
+    async def on_resume(self):
+        self.init()
+        print("On resume called")
+
     def init(self):
         self.jup = get(self.emojis, name='Jupiter')
         self.sat = get(self.emojis, name='Saturn')
@@ -30,7 +34,7 @@ class PlanetaryChadBot (discord.Client):
         self.delMsgChannel = self.get_channel(472912167704854529)
         self.comImgChannel = self.get_channel(544305081009438720)
         self.curvesChannel = self.get_channel(556987083122802720)
-        self.r9kchannel    = self.get_channel(782080507117699122)
+        self.r9kchannel    = self.get_channel(782381925036851230)
         
         self.c = curves.Curve()
         self.r9k = r9k.R9K()
@@ -122,6 +126,8 @@ class PlanetaryChadBot (discord.Client):
     async def on_message_edit(self, before,after):
         if len(before.embeds) == len(after.embeds):#I forget why this is here
             await self.log(before, "EDITED", edit=after.clean_content)
+        if after.channel.id == self.r9kchannel.id:
+            await self.r9k.handle_message(self, after)
 
     async def log(self, message, appendage, edit=""):
         if message.channel.id != self.delMsgChannel.id: #dont log the deleted msg channel
