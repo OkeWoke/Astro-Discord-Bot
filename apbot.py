@@ -1,4 +1,4 @@
-import discord, asyncio, curves, os, dss, logging, aiofiles, aiohttp, time, re
+import discord, asyncio, curves, os, dss, logging, aiofiles, aiohttp, time, re, r9k
 from discord.utils import get
 
 logger = logging.getLogger('discord')
@@ -22,8 +22,10 @@ class PlanetaryChadBot (discord.Client):
         self.delMsgChannel = self.get_channel(472912167704854529)
         self.comImgChannel = self.get_channel(544305081009438720)
         self.curvesChannel = self.get_channel(556987083122802720)
+        self.r9kchannel    = self.get_channel(782080507117699122)
         
         self.c = curves.Curve()
+        self.r9k = r9k.R9K()
         
         print("Logged in")
     
@@ -93,6 +95,9 @@ class PlanetaryChadBot (discord.Client):
                 return
 
             await message.channel.send("{0} Coordinates (ICRS J2k) \nRA: {1}\nDEC: {2}".format(param, coords[0],coords[1]))
+
+        if message.channel.id == self.r9kchannel.id:
+            await self.r9k.handle_message(self, message)
 
             
     async def send_img(self, channel, filename, **kwarg):
