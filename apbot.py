@@ -124,9 +124,9 @@ class PlanetaryChadBot (discord.Client):
         await self.log(message, "DELETED")
 
     async def on_message_edit(self, before,after):
-        if len(before.embeds) == len(after.embeds):#I forget why this is here
+        if len(before.embeds) == len(after.embeds):# Gets around embed changes
             await self.log(before, "EDITED", edit=after.clean_content)
-        if after.channel.id == self.r9kchannel.id:
+        if after.channel.id == self.r9kchannel.id and before.content != after.content:
             await self.r9k.handle_message(self, after)
 
     async def log(self, message, appendage, edit=""):
