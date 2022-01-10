@@ -11,7 +11,7 @@ class PlanetaryChadBot (discord.Client):
 
     bot_id = 457372655926902785
     
-    regions = ["New Zealand","Australia","Europe","United States","Canada","Central America","South America","Asia","Middle East","Africa"]
+    regions = ["New Zealand", "Australia", "Europe", "United States", "Canada", "Central America", "South America", "Asia", "Middle East", "Africa", "United Kingdom", "Mexico", "India", "Atlantic Ocean", "Alaska"]
 
     async def on_connect(self):
         self.init()
