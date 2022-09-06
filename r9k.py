@@ -48,7 +48,7 @@ class R9K:
                 for new_hash in new_hashes:
                     c.execute('INSERT INTO message (hash) VALUES (?)', (new_hash,))
                     conn.commit()
-                    self.cache.add(h)
+                    self.cache.add(new_hash)
                 conn.close()
         finally:
             self.mutex.release()
