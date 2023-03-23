@@ -27,7 +27,9 @@ conn.commit()
 conn.close()
 
 subreddits = ["astrophotography"]
-webhook_url = "YOUR_WEBHOOK_URL_HERE"
+f = open("webhook_url.txt","r")
+webhook_url = f.read().rstrip()
+f.close()
 
 while 1:
     try:
