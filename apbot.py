@@ -1,4 +1,4 @@
-import discord, asyncio, curves, os, dss, logging, aiofiles, aiohttp, time, re, r9k
+import discord, curves, os, dss, logging, aiofiles, aiohttp, time, re, r9k, subprocess
 from discord.utils import get
 
 logger = logging.getLogger('discord')
@@ -19,7 +19,8 @@ class PlanetaryChadBot (discord.Client):
 
     async def on_ready(self):
         self.init()
-        print("ON ready called")
+        print("On ready called")
+        self.start_reddit_listener()
 
     async def on_resume(self):
         self.init()
@@ -38,10 +39,12 @@ class PlanetaryChadBot (discord.Client):
         
         self.c = curves.Curve()
         self.r9k = r9k.R9K()
-        
+
+    def start_reddit_listener(self):
+        subprocess.Popen('./reddit_feed.py', shell=True)
 
     async def on_message(self, message):
-        
+
         await self.log(message, "POSTED")
         async def error_check(obj):
             if type(obj) == str and obj.startswith('Error:'):
@@ -163,5 +166,8 @@ bot_token = f.read()
 bot_token = bot_token.rstrip()
 f.close()
 
-botClient = PlanetaryChadBot()
+intents = discord.Intents.default()
+intents.members = True
+
+botClient = PlanetaryChadBot(intents=intents)
 botClient.run(bot_token, reconnect=True)
