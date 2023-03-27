@@ -1,5 +1,7 @@
-import discord, curves, os, dss, logging, aiofiles, aiohttp, time, re, r9k, subprocess
+import discord, curves, os, dss, logging, aiofiles, aiohttp, time, re, r9k, threading
 from discord.utils import get
+import sys
+from reddit_feed import reddit_feeder
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -43,7 +45,8 @@ class PlanetaryChadBot (discord.Client):
         return self.regionChannel
         
     def start_reddit_listener(self):
-        subprocess.Popen('./reddit_feed.py', shell=True)
+        t = threading.Thread(name='reddit_feed', target=reddit_feeder)
+        t.start()
 
     async def on_message(self, message):
         if self.regionChannel is None:
