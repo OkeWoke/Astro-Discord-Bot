@@ -13,7 +13,6 @@ import database
 import time
 from html import unescape
 
-
 print("Starting Reddit Listener...")
 
 cache = set()
@@ -27,7 +26,7 @@ conn.commit()
 conn.close()
 
 subreddits = ["astrophotography"]
-f = open("webhook_url.txt","r")
+f = open("webhook_url.txt", "r")
 webhook_url = f.read().rstrip()
 f.close()
 
@@ -58,35 +57,31 @@ while 1:
             permalink = f"https://www.reddit.com{post['data']['permalink']}"
             color = post['data']['link_flair_background_color']
             color = "1C1B19" if color == "" or color is None else color[1:]
-            subreddit = post['data']['subreddit_name_prefixed']
-            subreddit_url = "https://www.reddit.com/" + subreddit
+            author_name = post['data']['author']
+            author_url = f"https://www.reddit.com/user/{author_name}"
 
             if post['data']['thumbnail'] == 'self':
                 embed = DiscordEmbed(title=unescape(post['data']['title']), url=permalink,
                                      description=unescape(post['data']['selftext']))
-                embed.set_author(subreddit, url=subreddit_url)
-                embed.set_footer(text=f"Posted by u/{post['data']['author']}")
+                embed.set_description(f"Posted by u/{author_name}")
                 embed.set_timestamp(timestamp=post['data']['created'])
                 embed.set_color(color)
             elif post['data']['is_video']:
                 embed = DiscordEmbed(title=unescape(post['data']['title']), url=permalink)
-                embed.set_author(subreddit, url=subreddit_url)
                 embed.set_image(url=post['data']['thumbnail'])
-                embed.set_footer(text=f"Video posted by u/{post['data']['author']}")
+                embed.set_description(f"Posted by u/{author_name}")
                 embed.set_timestamp(timestamp=post['data']['created'])
                 embed.set_color(color)
             else:
                 embed = DiscordEmbed(title=unescape(post['data']['title']), url=permalink)
-                embed.set_author(subreddit, url=subreddit_url)
                 url = post['data']['url'].lower()
-                if url[url.rfind("."):] in [".jpg",".png",".gif",".webp",".jpeg"]:
+                if url[url.rfind("."):] in [".jpg", ".png", ".gif", ".webp", ".jpeg"]:
                     embed.set_image(url=url)
                 else:
                     embed.set_image(url=post['data']['thumbnail'])
-                embed.set_footer(text=f"Image posted by u/{post['data']['author']}")
+                embed.set_description(f"Posted by u/{author_name}")
                 embed.set_timestamp(timestamp=post['data']['created'])
                 embed.set_color(color)
-
 
             webhook.add_embed(embed)
             webhook.execute()
@@ -102,4 +97,4 @@ while 1:
         conn.commit()
         conn.close()
 
-    time.sleep(300) # Wait 5 minutes until requesting again
+    time.sleep(300)  # Wait 5 minutes until requesting again
