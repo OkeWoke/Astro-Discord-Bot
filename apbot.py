@@ -8,9 +8,9 @@ handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(me
 logger.addHandler(handler)
 
 class PlanetaryChadBot (discord.Client):
-
+    SERVER_ID = 247338197921693697
     bot_id = 457372655926902785
-    
+
     regions = ["New Zealand", "Australia", "Europe", "United States", "Canada", "Central America", "South America", "Asia", "Middle East", "Africa", "United Kingdom", "Mexico", "India", "Atlantic Ocean", "Alaska"]
 
     async def on_connect(self):
@@ -29,19 +29,21 @@ class PlanetaryChadBot (discord.Client):
         self.jup = get(self.emojis, name='Jupiter')
         self.sat = get(self.emojis, name='Saturn')
         self.lefty = get(self.emojis, name='lefty')
-        
+        self.serverinst = self.get_guild(self.SERVER_ID)
         self.regionChannel = self.get_channel(248395661244891136)
         self.delMsgChannel = self.get_channel(472912167704854529)
         self.comImgChannel = self.get_channel(544305081009438720)
         self.curvesChannel = self.get_channel(556987083122802720)
         self.r9kchannel    = self.get_channel(782381925036851230)
-        
         self.c = curves.Curve()
         self.r9k = r9k.R9K()
-        
-
+        print(self.regionChannel, "init state")
+        return self.regionChannel
     async def on_message(self, message):
-        
+        if self.regionChannel is None:
+            if self.init() is None:
+                return
+            
         await self.log(message, "POSTED")
         async def error_check(obj):
             if type(obj) == str and obj.startswith('Error:'):
