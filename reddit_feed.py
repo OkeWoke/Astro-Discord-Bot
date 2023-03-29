@@ -70,7 +70,7 @@ while 1:
             elif post['data']['is_video']:
                 embed = DiscordEmbed(title=unescape(post['data']['title']), url=permalink)
                 embed.set_image(url=post['data']['thumbnail'])
-                embed.set_description(description + f"\n\n{post['data']['thumbnail']}")
+                embed.set_description(description)
                 embed.set_timestamp(timestamp=post['data']['created'])
                 embed.set_color(color)
             else:
@@ -80,7 +80,7 @@ while 1:
                     embed.set_image(url=url)
                 else:
                     embed.set_image(url=post['data']['thumbnail'])
-                embed.set_description(description)
+                embed.set_description(description + f"\n\n{url}")
                 embed.set_timestamp(timestamp=post['data']['created'])
                 embed.set_color(color)
 
