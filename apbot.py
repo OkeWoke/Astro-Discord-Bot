@@ -2,6 +2,7 @@ import discord, curves, os, dss, logging, aiofiles, aiohttp, time, re, r9k, thre
 from discord.utils import get
 import sys
 from reddit_feed import reddit_feeder
+from slugify import slugify
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -144,7 +145,7 @@ class PlanetaryChadBot (discord.Client):
         if message.channel.id != self.delMsgChannel.id: #dont log the deleted msg channel
             #Format is Timestamp: post/edit/del : channel : author: content 
             string = "{0}: {1} : {2} : {3} : {4} : {5} : {6}".format(str(message.created_at),appendage, message.channel.name, message.author.id, message.author.display_name, message.clean_content, edit)
-            with open("logs/"+message.channel.name+".log","a+")as f:
+            with open("logs/"+slugify(message.channel.name)+".log","a+")as f:
                 f.write(string+"\n")
             if appendage != "POSTED":
                 await self.delMsgChannel.send(string)
