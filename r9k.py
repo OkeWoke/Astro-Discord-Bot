@@ -2,6 +2,7 @@ import sqlite3
 import threading
 import database
 import hashlib
+from PIL import Image
 
 class R9K:
     def __init__(self):
@@ -21,19 +22,34 @@ class R9K:
         if len(message.content) == 0:
             return
 
+        # Check for text in message
         h = hashlib.sha256(message.content.lower().encode('utf-8')).hexdigest()
+        h_exists = h in self.cache
+        # Check for image attached to message
+        img_h = None
+        img_h_exists = False
+        if message.attachments != []:
+            file = message.attachments[0]
+            if file.filename[file.filename.rfind("."):] in [".jpg",".JPG",".png",".PNG",".gif",".GIF"]:
+                # Discord API Attachment.read() returns bytes
+                file_bytes = await file.read()
+                img_h = hashlib.sha256(file_bytes.hexdigest())
+                img_h_exists = img_h in self.cache
         should_delete = False
         self.mutex.acquire()
         try:
-            if h in self.cache:
+            if h_exists or img_h_exists:
                 should_delete = True
             else:
                 conn = database.get_connection()
                 c = conn.cursor()
-                c.execute('INSERT INTO message (hash) VALUES (?)', (h,))
-                conn.commit()
+                # All the new hashes
+                new_hashes = [msg_hash for msg_hash in [h, img_h] if msg_hash is not None]
+                for new_hash in new_hashes:
+                    c.execute('INSERT INTO message (hash) VALUES (?)', (new_hash,))
+                    conn.commit()
+                    self.cache.add(new_hash)
                 conn.close()
-                self.cache.add(h)
         finally:
             self.mutex.release()
         if should_delete:
