@@ -12,6 +12,8 @@ import requests
 import database
 import time
 from html import unescape
+import logging
+logger = logging.getLogger('discord')
 
 def reddit_feeder():
     print("Starting Reddit Listener...")
@@ -44,6 +46,8 @@ def reddit_feeder():
             continue
 
         try:
+            logger.info(req.json())
+            print(req.json())
             posts = req.json()['data']['children'][::-1]  # Returns 25 newest posts
         except json.decoder.JSONDecodeError as e:
             print(req.json())

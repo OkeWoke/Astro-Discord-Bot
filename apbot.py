@@ -23,7 +23,7 @@ class PlanetaryChadBot (discord.Client):
     async def on_ready(self):
         self.init()
         print("On ready called")
-        self.start_reddit_listener()
+        # Disabled for now self.start_reddit_listener()
 
     async def on_resume(self):
         self.init()
@@ -50,6 +50,7 @@ class PlanetaryChadBot (discord.Client):
         t.start()
 
     async def on_message(self, message):
+       
         if self.regionChannel is None:
             if self.init() is None:
                 return
@@ -72,7 +73,6 @@ class PlanetaryChadBot (discord.Client):
 
         if message.channel.id != self.comImgChannel.id and message.attachments != []: #There is an attachment
             file = message.attachments[0] #Grabbing only the first attachment
-            
             if  file.filename[file.filename.rfind("."):] in [".jpg",".JPG",".png",".PNG",".gif",".GIF"]:
                
                 if message.channel.id==self.curvesChannel.id and message.author.id !=self.bot_id: #if someone posts to curve channel and it isnt the bot itself
@@ -177,6 +177,7 @@ f.close()
 
 intents = discord.Intents.default()
 intents.members = True
+intents.message_content = True
 
 botClient = PlanetaryChadBot(intents=intents)
 botClient.run(bot_token, reconnect=True)
