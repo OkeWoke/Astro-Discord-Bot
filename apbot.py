@@ -1,5 +1,8 @@
-import discord, curves, os, dss, logging, aiofiles, aiohttp, time, re, r9k, subprocess
+import discord, curves, os, dss, logging, aiofiles, aiohttp, time, re, r9k, threading
 from discord.utils import get
+import sys
+from reddit_feed import reddit_feeder
+from slugify import slugify
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -20,7 +23,7 @@ class PlanetaryChadBot (discord.Client):
     async def on_ready(self):
         self.init()
         print("On ready called")
-        self.start_reddit_listener()
+        # Disabled for now self.start_reddit_listener()
 
     async def on_resume(self):
         self.init()
@@ -43,9 +46,11 @@ class PlanetaryChadBot (discord.Client):
         return self.regionChannel
         
     def start_reddit_listener(self):
-        subprocess.Popen('./reddit_feed.py', shell=True)
+        t = threading.Thread(name='reddit_feed', target=reddit_feeder)
+        t.start()
 
     async def on_message(self, message):
+       
         if self.regionChannel is None:
             if self.init() is None:
                 return
@@ -68,7 +73,6 @@ class PlanetaryChadBot (discord.Client):
 
         if message.channel.id != self.comImgChannel.id and message.attachments != []: #There is an attachment
             file = message.attachments[0] #Grabbing only the first attachment
-            
             if  file.filename[file.filename.rfind("."):] in [".jpg",".JPG",".png",".PNG",".gif",".GIF"]:
                
                 if message.channel.id==self.curvesChannel.id and message.author.id !=self.bot_id: #if someone posts to curve channel and it isnt the bot itself
@@ -141,7 +145,7 @@ class PlanetaryChadBot (discord.Client):
         if message.channel.id != self.delMsgChannel.id: #dont log the deleted msg channel
             #Format is Timestamp: post/edit/del : channel : author: content 
             string = "{0}: {1} : {2} : {3} : {4} : {5} : {6}".format(str(message.created_at),appendage, message.channel.name, message.author.id, message.author.display_name, message.clean_content, edit)
-            with open("logs/"+message.channel.name+".log","a+")as f:
+            with open("logs/"+slugify(message.channel.name)+".log","a+")as f:
                 f.write(string+"\n")
             if appendage != "POSTED":
                 await self.delMsgChannel.send(string)
@@ -150,7 +154,7 @@ class PlanetaryChadBot (discord.Client):
     async def getImg(self, url):
         """Takes img url that contains 3 or 4 char extension, saves and returns filename"""
         try:
-            ext = re.search("\.[A-Za-z]{3,4}$",url).group(0)
+            ext = re.search(r"\.[A-Za-z]{3,4}(?=\?|$)", url).group(0)
         except AttributeError as e:
             return 'Error: invalid url provided or contains an unsupported file extension'
         else:
@@ -173,6 +177,7 @@ f.close()
 
 intents = discord.Intents.default()
 intents.members = True
+intents.message_content = True
 
 botClient = PlanetaryChadBot(intents=intents)
 botClient.run(bot_token, reconnect=True)
