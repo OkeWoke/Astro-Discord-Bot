@@ -154,7 +154,7 @@ class PlanetaryChadBot (discord.Client):
     async def getImg(self, url):
         """Takes img url that contains 3 or 4 char extension, saves and returns filename"""
         try:
-            ext = re.search("\.[A-Za-z]{3,4}$",url).group(0)
+            ext = re.search(r"\.[A-Za-z]{3,4}(?=\?|$)", url).group(0)
         except AttributeError as e:
             return 'Error: invalid url provided or contains an unsupported file extension'
         else:
